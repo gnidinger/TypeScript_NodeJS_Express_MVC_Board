@@ -1,0 +1,24 @@
+# .gitignore
+node_modules/
+npm-debug.log
+.DS_Store
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+.env
+
+public
+dist
+
+# IDE / editor specific
+.vscode
+.idea
+*.sw*
