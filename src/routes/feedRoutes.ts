@@ -3,7 +3,7 @@ import { createFeed, getAllFeeds } from '../controllers/feedController';
 
 const router = express.Router();
 
-router.post('/feeds', createFeed);
-router.get('/feeds', getAllFeeds);
+router.post('/', createFeed);
+router.get('/', getAllFeeds);
 
 export default router;
