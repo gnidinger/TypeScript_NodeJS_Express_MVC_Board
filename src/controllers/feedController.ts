@@ -1,15 +1,53 @@
 import { Request, Response } from 'express';
-import feed from '../models/Feed';
+import asyncHandler from 'express-async-handler';
+import Feed from '../models/Feed';
 
-const createFeed = async (req: Request, res: Response) => {
-  const newFeed = new feed(req.body);
+const createFeed = asyncHandler(async (req: Request, res: Response) => {
+  const newFeed = new Feed(req.body);
   const savedFeed = await newFeed.save();
   res.json(savedFeed);
-};
+});
 
-const getAllFeeds = async (req: Request, res: Response) => {
-  const feeds = await feed.find({});
+const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
+  const feedSeq = req.query.feedSeq;
+  const feed = await Feed.findOne({ feedSeq: feedSeq });
+  if (feed) {
+    res.json(feed);
+  } else {
+    res.status(404).send('해당하는 피드가 없습니다.');
+  }
+});
+
+const getAllFeeds = asyncHandler(async (req: Request, res: Response) => {
+  const feeds = await Feed.find({});
   res.json(feeds);
-};
+});
 
-export { createFeed, getAllFeeds };
+const updateFeed = asyncHandler(async (req: Request, res: Response) => {
+  const feedSeq = Number(req.params.feedSeq);
+  const feed = await Feed.findOne({ feedSeq: feedSeq });
+
+  if (feed) {
+    feed.title = req.body.title;
+    feed.body = req.body.body;
+
+    const updatedFeed = await feed.save();
+    res.json(updatedFeed);
+  } else {
+    res.status(404).send(`${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
+  }
+});
+
+const deleteFeed = asyncHandler(async (req: Request, res: Response) => {
+  const feedSeq = Number(req.params.feedSeq);
+  const feed = await Feed.findOne({ feedSeq: feedSeq });
+
+  if (feed) {
+    await Feed.deleteOne({ feedSeq: feedSeq });
+    res.status(200).send('삭제 완료');
+  } else {
+    res.status(404).send(`${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
+  }
+});
+
+export { createFeed, getFeedByFeedSeq, getAllFeeds, updateFeed, deleteFeed };
