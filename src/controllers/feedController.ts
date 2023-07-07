@@ -1,9 +1,13 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Feed from '../models/Feed';
+import sendErrorResponse from '../utils/sendErrorResponse';
 
 const createFeed = asyncHandler(async (req: Request, res: Response) => {
-  const newFeed = new Feed(req.body);
+  const userSeq = res.locals.user.userSeq;
+
+  const newFeed = new Feed({ ...req.body, userSeq: userSeq });
+
   const savedFeed = await newFeed.save();
   res.json(savedFeed);
 });
@@ -11,10 +15,11 @@ const createFeed = asyncHandler(async (req: Request, res: Response) => {
 const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
   const feedSeq = req.query.feedSeq;
   const feed = await Feed.findOne({ feedSeq: feedSeq });
+
   if (feed) {
     res.json(feed);
   } else {
-    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+    sendErrorResponse(res, 404, `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
     return;
   }
 });
@@ -25,32 +30,46 @@ const getAllFeeds = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const updateFeed = asyncHandler(async (req: Request, res: Response) => {
+  const userSeq = res.locals.user.userSeq;
+
   const feedSeq = Number(req.params.feedSeq);
   const feed = await Feed.findOne({ feedSeq: feedSeq });
 
-  if (feed) {
-    feed.title = req.body.title;
-    feed.body = req.body.body;
-
-    const updatedFeed = await feed.save();
-    res.json(updatedFeed);
-  } else {
-    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+  if (!feed) {
+    sendErrorResponse(res, 404, `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
     return;
   }
+
+  if (feed.userSeq !== userSeq) {
+    sendErrorResponse(res, 401, 'Unauthorized');
+    return;
+  }
+
+  feed.title = req.body.title;
+  feed.body = req.body.body;
+
+  const updatedFeed = await feed.save();
+  res.json(updatedFeed);
 });
 
 const deleteFeed = asyncHandler(async (req: Request, res: Response) => {
+  const userSeq = res.locals.user.userSeq;
+
   const feedSeq = Number(req.params.feedSeq);
   const feed = await Feed.findOne({ feedSeq: feedSeq });
 
-  if (feed) {
-    await Feed.deleteOne({ feedSeq: feedSeq });
-    res.status(200).json({ message: '삭제 완료' });
-  } else {
-    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+  if (!feed) {
+    sendErrorResponse(res, 404, `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
     return;
   }
+
+  if (feed.userSeq !== userSeq) {
+    sendErrorResponse(res, 401, 'Unauthorized');
+    return;
+  }
+
+  await Feed.deleteOne({ feedSeq: feedSeq });
+  res.status(200).json({ message: '삭제 완료' });
 });
 
 export { createFeed, getFeedByFeedSeq, getAllFeeds, updateFeed, deleteFeed };

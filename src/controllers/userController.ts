@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import User from '../models/User';
 import generateToken from '../utils/generateToken';
+import sendErrorResponse from '../utils/sendErrorResponse';
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const { id, password, name } = req.body;
@@ -9,8 +10,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const userExists = await User.findOne({ id });
 
   if (userExists) {
-    res.status(400);
-    throw new Error('이미 존재하는 ID 입니다.');
+    sendErrorResponse(res, 400, '이미 존재하는 ID 입니다.');
+    return;
   }
 
   const newUser = new User({ id, password, name });
@@ -24,7 +25,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
       token: generateToken(savedUser.userSeq, savedUser.name),
     });
   } else {
-    res.status(400).json({ error: '잘못된 사용자 데이터 입니다.' });
+    sendErrorResponse(res, 400, '잘못된 사용자 데이터 입니다.');
     return;
   }
 });
@@ -42,8 +43,8 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
       token: generateToken(user.userSeq, user.name),
     });
   } else {
-    res.status(401);
-    throw new Error('이메일 혹은 비밀번호를 잘못 입력하셨습니다.');
+    sendErrorResponse(res, 401, '이메일 혹은 비밀번호를 잘못 입력하셨습니다.');
+    return;
   }
 });
 

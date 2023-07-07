@@ -3,6 +3,7 @@ import { autoIncrement } from '../middleware/autoIncrement';
 
 interface IFeed extends Document {
   feedSeq: number;
+  userSeq: number;
   title: string;
   body: string;
 }
@@ -10,6 +11,7 @@ interface IFeed extends Document {
 const feedSchema: Schema<IFeed> = new Schema(
   {
     feedSeq: { type: Number, unique: true, required: true, default: 1 },
+    userSeq: { type: Number },
     title: { type: String, required: true },
     body: { type: String, required: true },
   },
