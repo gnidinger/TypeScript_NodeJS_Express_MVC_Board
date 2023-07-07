@@ -22,7 +22,8 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.use((err: any, req: Request, res: Response) => {
   res.status(err.status || 500).send({ message: err.message });
 });
 
