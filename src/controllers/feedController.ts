@@ -14,7 +14,8 @@ const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
   if (feed) {
     res.json(feed);
   } else {
-    res.status(404).send('해당하는 피드가 없습니다.');
+    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+    return;
   }
 });
 
@@ -34,7 +35,8 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
     const updatedFeed = await feed.save();
     res.json(updatedFeed);
   } else {
-    res.status(404).send(`${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
+    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+    return;
   }
 });
 
@@ -44,9 +46,10 @@ const deleteFeed = asyncHandler(async (req: Request, res: Response) => {
 
   if (feed) {
     await Feed.deleteOne({ feedSeq: feedSeq });
-    res.status(200).send('삭제 완료');
+    res.status(200).json({ message: '삭제 완료' });
   } else {
-    res.status(404).send(`${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);
+    res.status(404).json({ error: `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.` });
+    return;
   }
 });
 

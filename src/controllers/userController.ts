@@ -24,7 +24,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
       token: generateToken(savedUser.userSeq, savedUser.name),
     });
   } else {
-    res.status(400).send('잘못된 사용자 데이터 입니다.');
+    res.status(400).json({ error: '잘못된 사용자 데이터 입니다.' });
+    return;
   }
 });
 
