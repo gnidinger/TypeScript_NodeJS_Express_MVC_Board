@@ -48,4 +48,60 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { registerUser, loginUser };
+const getUserByUserSeq = asyncHandler(async (req: Request, res: Response) => {
+  const userSeq = req.params.userSeq;
+  const user = await User.findOne({ userSeq: userSeq });
+
+  if (!user) {
+    sendErrorResponse(res, 404, `${userSeq} 시퀀스에 해당하는 사용자가 없습니다.`);
+    return;
+  }
+
+  res.status(200).json(user);
+});
+
+const updateUser = asyncHandler(async (req: Request, res: Response) => {
+  const authUserSeq = res.locals.user.userSeq;
+
+  const userSeq = Number(req.params.userSeq);
+
+  const user = await User.findOne({ userSeq: userSeq });
+
+  if (!user) {
+    sendErrorResponse(res, 404, `${userSeq} 시퀀스에 해당하는 사용자가 없습니다.`);
+    return;
+  }
+
+  if (user.userSeq !== authUserSeq) {
+    sendErrorResponse(res, 401, 'Unauthorized');
+    return;
+  }
+
+  user.name = req.body.user;
+
+  const updatedUser = await user.save();
+  res.status(200).json(updatedUser);
+});
+
+const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const authUserSeq = res.locals.user.userSeq;
+
+  const userSeq = Number(req.params.userSeq);
+
+  const user = await User.findOne({ userSeq: userSeq });
+
+  if (!user) {
+    sendErrorResponse(res, 404, `${userSeq} 시퀀스에 해당하는 사용자가 없습니다.`);
+    return;
+  }
+
+  if (user.userSeq !== authUserSeq) {
+    sendErrorResponse(res, 401, 'Unauthorized');
+    return;
+  }
+
+  await User.deleteOne({ userSeq: authUserSeq });
+  res.status(200).json({ message: '탈퇴 완료' });
+});
+
+export { registerUser, loginUser, getUserByUserSeq, updateUser, deleteUser };
