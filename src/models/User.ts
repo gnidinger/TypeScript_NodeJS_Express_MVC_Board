@@ -21,7 +21,6 @@ const userSchema: Schema<IUser> = new Schema(
     },
     password: {
       type: String,
-      required: true,
       validate: {
         validator: function (v: string) {
           return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(v);

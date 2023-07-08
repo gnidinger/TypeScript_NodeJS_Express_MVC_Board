@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/', authMiddleware, createFeed);
 router.get('/:feedSeq', getFeedByFeedSeq);
 router.get('/', getAllFeeds);
-router.patch('/:feedSeq', updateFeed);
-router.delete('/:feedSeq', deleteFeed);
+router.patch('/:feedSeq/edit', authMiddleware, updateFeed);
+router.delete('/:feedSeq/delete', authMiddleware, deleteFeed);
 
 export default router;

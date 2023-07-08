@@ -14,6 +14,11 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  if (!password || password === '') {
+    res.status(400).json({ error: '비밀번호는 필수 항목입니다.' });
+    return;
+  }
+
   const newUser = new User({ id, password, name });
   const savedUser = await newUser.save();
 
@@ -57,7 +62,10 @@ const getUserByUserSeq = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  res.status(200).json(user);
+  res.status(200).json({
+    id: user.id,
+    name: user.name,
+  });
 });
 
 const updateUser = asyncHandler(async (req: Request, res: Response) => {
@@ -77,10 +85,43 @@ const updateUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  user.name = req.body.user;
+  user.name = req.body.name;
 
-  const updatedUser = await user.save();
-  res.status(200).json(updatedUser);
+  await user.updateOne({ name: req.body.name });
+  const updatedUser = await User.findOne({ userSeq: userSeq });
+  res.status(200).json({ name: updatedUser!.name });
+});
+
+const updateUserPassword = asyncHandler(async (req: Request, res: Response) => {
+  const userSeq = req.params.userSeq;
+
+  const { oldPassword, newPassword, newPasswordRepeat } = req.body;
+
+  const user = await User.findOne({ userSeq: userSeq });
+
+  if (!user) {
+    sendErrorResponse(res, 404, `${userSeq} 시퀀스에 해당하는 사용자가 없습니다.`);
+    return;
+  }
+
+  if (user.userSeq !== Number(userSeq)) {
+    sendErrorResponse(res, 401, 'Unauthorized');
+    return;
+  }
+
+  if (!(await user.matchPassword(oldPassword))) {
+    sendErrorResponse(res, 400, '비밀번호가 틀렸습니다.');
+    return;
+  }
+
+  if (newPassword !== newPasswordRepeat) {
+    sendErrorResponse(res, 400, '새 비밀번호를 다시 입력해 주세요.');
+    return;
+  }
+
+  user.password = newPassword;
+  await user.save();
+  res.status(200).json({ message: '비밀번호 변경 완료' });
 });
 
 const deleteUser = asyncHandler(async (req: Request, res: Response) => {
@@ -104,4 +145,4 @@ const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ message: '탈퇴 완료' });
 });
 
-export { registerUser, loginUser, getUserByUserSeq, updateUser, deleteUser };
+export { registerUser, loginUser, getUserByUserSeq, updateUser, updateUserPassword, deleteUser };
