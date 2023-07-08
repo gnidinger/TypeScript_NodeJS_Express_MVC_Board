@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import userRoutes from './routes/userRoutes';
 import feedRoutes from './routes/feedRoutes';
+import commentRoutes from './routes/commentRoutes';
 import morgan from 'morgan';
 import sendErrorResponse from './utils/sendErrorResponse';
 
@@ -18,6 +19,7 @@ app.use(morgan('dev'));
 
 app.use('/users', userRoutes);
 app.use('/feeds', feedRoutes);
+app.use('/comments', commentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

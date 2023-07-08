@@ -2,18 +2,23 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { autoIncrement } from '../middleware/autoIncrement';
 
 interface IFeed extends Document {
-  feedSeq: number;
+  user: Schema.Types.ObjectId;
   userSeq: number;
+  feedSeq: number;
   title: string;
-  body: string;
+  content: string;
 }
 
 const feedSchema: Schema<IFeed> = new Schema(
   {
-    feedSeq: { type: Number, unique: true, required: true, default: 1 },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     userSeq: { type: Number, required: true },
+    feedSeq: { type: Number, unique: true, required: true, default: 1 },
     title: { type: String, required: true },
-    body: { type: String, required: true },
+    content: { type: String, required: true },
   },
   {
     timestamps: true,

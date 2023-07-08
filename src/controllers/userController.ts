@@ -18,7 +18,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const savedUser = await newUser.save();
 
   if (savedUser) {
-    res.status(200).json({
+    res.status(201).json({
       userSeq: savedUser.userSeq,
       id: savedUser.id,
       name: savedUser.name,
