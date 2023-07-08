@@ -14,11 +14,6 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  if (!password || password === '') {
-    res.status(400).json({ error: '비밀번호는 필수 항목입니다.' });
-    return;
-  }
-
   const newUser = new User({ id, password, name });
   const savedUser = await newUser.save();
 

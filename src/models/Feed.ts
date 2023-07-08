@@ -11,7 +11,7 @@ interface IFeed extends Document {
 const feedSchema: Schema<IFeed> = new Schema(
   {
     feedSeq: { type: Number, unique: true, required: true, default: 1 },
-    userSeq: { type: Number },
+    userSeq: { type: Number, required: true },
     title: { type: String, required: true },
     body: { type: String, required: true },
   },

@@ -4,6 +4,7 @@ import connectDB from './config/db';
 import userRoutes from './routes/userRoutes';
 import feedRoutes from './routes/feedRoutes';
 import morgan from 'morgan';
+import sendErrorResponse from './utils/sendErrorResponse';
 
 dotenv.config();
 
@@ -24,7 +25,8 @@ app.get('/', (req, res) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  res.status(err.status || 500).send({ message: err.message });
+  sendErrorResponse(res, err.status || 500, err.message);
+  return;
 });
 
 app.listen(port, () => {
