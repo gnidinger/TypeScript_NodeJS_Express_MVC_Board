@@ -2,7 +2,7 @@ import express from 'express';
 import { createComment, getCommentsByFeedSeq, updateComment, deleteComment } from '../controllers/commentController';
 import { authMiddleware } from '../middleware/authentication';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.post('/', authMiddleware, createComment);
 router.get('/', getCommentsByFeedSeq);
