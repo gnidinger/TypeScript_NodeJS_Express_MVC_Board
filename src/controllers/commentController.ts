@@ -18,8 +18,11 @@ const createComment = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const newComment = new Comment({ ...req.body, user: user!._id, feed: feed._id, userSeq: userSeq, feedSeq: feedSeq });
-
   const savedComment = await newComment.save();
+
+  feed.comments.push(savedComment._id);
+  await feed.save();
+
   res.status(201).json(savedComment);
 });
 
@@ -72,6 +75,15 @@ const deleteComment = asyncHandler(async (req: Request, res: Response) => {
   if (comment.userSeq !== userSeq) {
     sendErrorResponse(res, 401, 'Unauthorized');
     return;
+  }
+
+  const feed = await Feed.findById(comment.feed);
+  if (feed) {
+    const index = feed.comments.indexOf(comment._id);
+    if (index > -1) {
+      feed.comments.splice(index, 1);
+      await feed.save();
+    }
   }
 
   await Comment.deleteOne({ commentSeq: commentSeq });

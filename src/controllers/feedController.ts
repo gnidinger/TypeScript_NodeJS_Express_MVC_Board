@@ -18,7 +18,7 @@ const createFeed = asyncHandler(async (req: Request, res: Response) => {
 
 const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
   const feedSeq = req.params.feedSeq;
-  const feed = await Feed.findOne({ feedSeq: feedSeq });
+  const feed = await Feed.findOne({ feedSeq: feedSeq }).populate('comments');
 
   if (!feed) {
     sendErrorResponse(res, 404, `${feedSeq} 시퀀스에 해당하는 피드가 없습니다.`);

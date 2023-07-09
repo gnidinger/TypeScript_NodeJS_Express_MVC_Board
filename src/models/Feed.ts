@@ -7,6 +7,7 @@ interface IFeed extends Document {
   feedSeq: number;
   title: string;
   content: string;
+  comments: Schema.Types.ObjectId[];
 }
 
 const feedSchema: Schema<IFeed> = new Schema(
@@ -19,6 +20,12 @@ const feedSchema: Schema<IFeed> = new Schema(
     feedSeq: { type: Number, unique: true, required: true, default: 1 },
     title: { type: String, required: true },
     content: { type: String, required: true },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
+      },
+    ],
   },
   {
     timestamps: true,
