@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoutes';
 import feedRoutes from './routes/feedRoutes';
 import commentRoutes from './routes/commentRoutes';
 import morgan from 'morgan';
+import cors from './config/cors';
 import sendErrorResponse from './utils/sendErrorResponse';
 import { authMiddleware } from './middleware/authentication';
 
@@ -17,6 +18,7 @@ const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(cors);
 
 app.use('/users', userRoutes);
 app.use('/feeds', feedRoutes);

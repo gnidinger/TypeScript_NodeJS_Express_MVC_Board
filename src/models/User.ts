@@ -30,7 +30,7 @@ const userSchema: Schema<IUser> = new Schema(
       required: true,
       validate: {
         validator: function (v: string) {
-          return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(v);
+          return /^(?=.*[A-Za-z])(?=.*\d).{6,}$/.test(v);
         },
         message: (props) => `${props.value} 는 문자, 숫자를 포함해 6글자 이상이어야 합니다.`,
       },

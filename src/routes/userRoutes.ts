@@ -23,12 +23,17 @@ router.route('/:userSeq/delete').delete(authMiddleware, deleteUser);
 router.get(
   '/auth/google',
   passport.authenticate('google', {
-    scope: ['profile, email'],
+    scope: ['profile', 'email'],
+    session: false,
   })
 );
 
-router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login ' }), (req, res) => {
-  res.redirect('/');
-});
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
 
 export default router;

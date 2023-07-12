@@ -12,7 +12,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: 'auth/google/callback',
+      callbackURL: 'http://localhost:8080/users/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       const existingUser = await User.findOne({ googleId: profile.id });
@@ -38,7 +38,10 @@ passport.use(
         const savedUser = await newUser.save();
 
         if (savedUser) {
-          done(null, savedUser);
+          const token = generateToken(savedUser.userSeq, savedUser.name);
+          const userObject = savedUser.toObject(); // .toObject() 사용
+
+          done(null, { ...userObject, token });
         } else {
           done(new Error('사용자 저장에 실패하였습니다.'));
         }
