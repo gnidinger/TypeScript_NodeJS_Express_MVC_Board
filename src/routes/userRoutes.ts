@@ -8,6 +8,8 @@ import {
   deleteUser,
 } from '../controllers/userController';
 import { authMiddleware } from '../middleware/authentication';
+import passport from 'passport';
+import '../config/passportConfig';
 
 const router = express.Router();
 
@@ -17,5 +19,16 @@ router.route('/:userSeq').get(getUserByUserSeq);
 router.route('/:userSeq/edit').patch(authMiddleware, updateUser);
 router.route('/:userSeq/changePassword').patch(authMiddleware, updateUserPassword);
 router.route('/:userSeq/delete').delete(authMiddleware, deleteUser);
+
+router.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['profile, email'],
+  })
+);
+
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login ' }), (req, res) => {
+  res.redirect('/');
+});
 
 export default router;

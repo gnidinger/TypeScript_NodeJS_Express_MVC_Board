@@ -6,13 +6,14 @@ import feedRoutes from './routes/feedRoutes';
 import commentRoutes from './routes/commentRoutes';
 import morgan from 'morgan';
 import sendErrorResponse from './utils/sendErrorResponse';
+import { authMiddleware } from './middleware/authentication';
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -23,6 +24,11 @@ app.use('/comments', commentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
+});
+
+// Add the new endpoint
+app.get('/current_user', authMiddleware, (req, res) => {
+  res.send(res.locals.user); // Send back the user data
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars

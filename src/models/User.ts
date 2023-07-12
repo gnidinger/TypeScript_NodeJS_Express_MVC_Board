@@ -5,6 +5,9 @@ import bcrypt from 'bcryptjs';
 interface IUser extends Document {
   userSeq: number;
   id: string;
+  googleId?: string;
+  kakaoId?: string;
+  naverId?: string;
   password: string;
   name: string;
   matchPassword: (enteredPassword: string) => Promise<boolean>;
@@ -19,6 +22,9 @@ const userSchema: Schema<IUser> = new Schema(
       required: true,
       match: [/^([\w-.]+@([\w-]+\.)+[\w-]{2,4})?$/, '올바른 이메일 형식을 입력해 주세요.'],
     },
+    googleId: String,
+    kakaoId: String,
+    naverId: String,
     password: {
       type: String,
       required: true,
