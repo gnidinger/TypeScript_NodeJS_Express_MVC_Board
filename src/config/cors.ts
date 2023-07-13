@@ -5,7 +5,7 @@ const corsOptions: cors.CorsOptions = {
   methods: '*',
   allowedHeaders: '*',
   credentials: false,
-  maxAge: 3600,
+  maxAge: 7200,
 };
 
 export default cors(corsOptions);
