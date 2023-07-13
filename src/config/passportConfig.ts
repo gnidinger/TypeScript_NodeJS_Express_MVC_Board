@@ -2,7 +2,8 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as KakaoStrategy } from 'passport-kakao';
 import { Strategy as NaverStrategy } from 'passport-naver-v2';
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { NaverProfile } from '../types/NaverProfile';
+import { Strategy as VerifiedCallback } from 'passport-jwt';
 import User from '../models/User';
 import generateToken from '../utils/generateToken';
 import generateRandomPassword from '../utils/generateRandomPassword';
@@ -75,6 +76,55 @@ passport.use(
           kakaoId: profile.id,
           id: profile._json.kakao_account.email,
           name: profile.displayName,
+          password: await generateRandomPassword(),
+        });
+
+        const savedUser = await newUser.save();
+
+        if (savedUser) {
+          const token = generateToken(savedUser.userSeq, savedUser.name);
+          const userObject = savedUser.toObject();
+
+          done(null, { ...userObject, token });
+        } else {
+          done(new Error('사용자 저장에 실패하였습니다.'));
+        }
+      }
+    }
+  )
+);
+
+passport.use(
+  new NaverStrategy(
+    {
+      clientID: process.env.NAVER_CLIENT_ID!,
+      clientSecret: process.env.NAVER_CLIENT_SECRET!,
+      callbackURL: 'http://localhost:8080/users/auth/naver/callback',
+    },
+    async (
+      accessToken: string,
+      refreshToken: string,
+      profile: NaverProfile,
+      done: (error: any, user?: any) => void
+    ) => {
+      // console.log(profile);
+      const existingUser = await User.findOne({ naverId: profile.id });
+
+      if (existingUser) {
+        const token = generateToken(existingUser.userSeq, existingUser.name);
+        const userObject = existingUser.toObject();
+
+        done(null, { ...userObject, token });
+      } else {
+        if (!profile._json.response.email) {
+          done(new Error('프로필에 이메일이 존재하지 않습니다.'));
+          return;
+        }
+
+        const newUser = new User({
+          naverId: profile.id,
+          id: profile._json.response.email,
+          name: profile._json.response.name,
           password: await generateRandomPassword(),
         });
 

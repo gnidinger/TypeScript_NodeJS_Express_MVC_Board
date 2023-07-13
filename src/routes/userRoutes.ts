@@ -51,4 +51,19 @@ router.get(
   }
 );
 
+router.get(
+  '/auth/naver',
+  passport.authenticate('naver', {
+    session: false,
+  })
+);
+
+router.get(
+  '/auth/naver/callback',
+  passport.authenticate('naver', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
 export default router;
