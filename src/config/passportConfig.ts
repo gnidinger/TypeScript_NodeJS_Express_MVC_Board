@@ -49,3 +49,46 @@ passport.use(
     }
   )
 );
+
+passport.use(
+  new KakaoStrategy(
+    {
+      clientID: process.env.KAKAO_CLIENT_ID!,
+      clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+      callbackURL: 'http://localhost:8080/users/auth/kakao/callback',
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      const existingUser = await User.findOne({ kakaoId: profile.id });
+
+      if (existingUser) {
+        const token = generateToken(existingUser.userSeq, existingUser.name);
+        const userObject = existingUser.toObject();
+
+        done(null, { ...userObject, token });
+      } else {
+        if (!profile._json.kakao_account.email) {
+          done(new Error('프로필에 이메일이 존재하지 않습니다.'));
+          return;
+        }
+
+        const newUser = new User({
+          kakaoId: profile.id,
+          id: profile._json.kakao_account.email,
+          name: profile.displayName,
+          password: await generateRandomPassword(),
+        });
+
+        const savedUser = await newUser.save();
+
+        if (savedUser) {
+          const token = generateToken(savedUser.userSeq, savedUser.name);
+          const userObject = savedUser.toObject();
+
+          done(null, { ...userObject, token });
+        } else {
+          done(new Error('사용자 저장에 실패하였습니다.'));
+        }
+      }
+    }
+  )
+);

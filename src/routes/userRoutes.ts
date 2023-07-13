@@ -36,4 +36,19 @@ router.get(
   }
 );
 
+router.get(
+  '/auth/kakao',
+  passport.authenticate('kakao', {
+    session: false,
+  })
+);
+
+router.get(
+  '/auth/kakao/callback',
+  passport.authenticate('kakao', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
 export default router;
