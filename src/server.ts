@@ -28,11 +28,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Add the new endpoint
-app.get('/current_user', authMiddleware, (req, res) => {
-  res.send(res.locals.user); // Send back the user data
-});
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   sendErrorResponse(res, err.status || 500, err.message);

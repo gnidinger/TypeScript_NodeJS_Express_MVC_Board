@@ -20,6 +20,10 @@ router.route('/:userSeq/edit').patch(authMiddleware, updateUser);
 router.route('/:userSeq/changePassword').patch(authMiddleware, updateUserPassword);
 router.route('/:userSeq/delete').delete(authMiddleware, deleteUser);
 
+router.get('/current_user', authMiddleware, (req, res) => {
+  res.send(res.locals.user);
+});
+
 router.get(
   '/auth/google',
   passport.authenticate('google', {
