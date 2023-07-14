@@ -3,7 +3,6 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as KakaoStrategy } from 'passport-kakao';
 import { Strategy as NaverStrategy } from 'passport-naver-v2';
 import { NaverProfile } from '../types/NaverProfile';
-import { Strategy as VerifiedCallback } from 'passport-jwt';
 import User from '../models/User';
 import generateToken from '../utils/generateToken';
 import generateRandomPassword from '../utils/generateRandomPassword';
@@ -15,23 +14,18 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: 'http://localhost:8080/users/auth/google/callback',
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (_accessToken, _refreshToken, profile, done) => {
       const existingUser = await User.findOne({ googleId: profile.id });
 
       if (existingUser) {
         const token = generateToken(existingUser.userSeq, existingUser.name);
-        const userObject = existingUser.toObject(); // .toObject() 사용
+        const userObject = existingUser.toObject();
 
         done(null, { ...userObject, token });
       } else {
-        if (!profile.emails) {
-          done(new Error('프로필에 이메일이 존재하지 않습니다.'));
-          return;
-        }
-
         const newUser = new User({
           googleId: profile.id,
-          id: profile.emails[0].value,
+          id: profile.emails![0].value,
           name: profile.displayName,
           password: await generateRandomPassword(),
         });
@@ -40,7 +34,7 @@ passport.use(
 
         if (savedUser) {
           const token = generateToken(savedUser.userSeq, savedUser.name);
-          const userObject = savedUser.toObject(); // .toObject() 사용
+          const userObject = savedUser.toObject();
 
           done(null, { ...userObject, token });
         } else {
@@ -58,7 +52,7 @@ passport.use(
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
       callbackURL: 'http://localhost:8080/users/auth/kakao/callback',
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (_accessToken, _refreshToken, profile, done) => {
       const existingUser = await User.findOne({ kakaoId: profile.id });
 
       if (existingUser) {
@@ -102,9 +96,10 @@ passport.use(
       callbackURL: 'http://localhost:8080/users/auth/naver/callback',
     },
     async (
-      accessToken: string,
-      refreshToken: string,
+      _accessToken: string,
+      _refreshToken: string,
       profile: NaverProfile,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       done: (error: any, user?: any) => void
     ) => {
       // console.log(profile);
@@ -116,11 +111,6 @@ passport.use(
 
         done(null, { ...userObject, token });
       } else {
-        if (!profile._json.response.email) {
-          done(new Error('프로필에 이메일이 존재하지 않습니다.'));
-          return;
-        }
-
         const newUser = new User({
           naverId: profile.id,
           id: profile._json.response.email,
