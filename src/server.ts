@@ -7,7 +7,6 @@ import commentRoutes from './routes/commentRoutes';
 import morgan from 'morgan';
 import cors from './config/cors';
 import sendErrorResponse from './utils/sendErrorResponse';
-import { authMiddleware } from './middleware/authentication';
 
 dotenv.config();
 
