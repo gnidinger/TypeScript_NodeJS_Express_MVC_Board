@@ -9,7 +9,6 @@ interface IFeed extends Document {
   content: string;
   comments: Schema.Types.ObjectId[];
   likesCount: number;
-  // likes: { type: number; default: 0 };
 }
 
 const feedSchema: Schema<IFeed> = new Schema(
