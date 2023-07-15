@@ -8,6 +8,7 @@ interface IComment extends Document {
   feedSeq: number;
   commentSeq: number;
   content: string;
+  likes: { type: number; default: 0 };
 }
 
 const commentSchema: Schema<IComment> = new Schema(
