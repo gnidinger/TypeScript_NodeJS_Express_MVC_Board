@@ -29,10 +29,18 @@ const clickLikeContent = asyncHandler(async (req: Request, res: Response) => {
 
   if (existingLike) {
     await existingLike.deleteOne({ _id: existingLike._id });
+
+    content!.likesCount--;
+    await content!.save();
+
     res.status(200).json({ message: '좋아요 취소가 완료되었습니다.' });
   } else {
-    const newLike = new Like({ user: user!._id, likeId: content!._id, likeType: likeType });
+    const newLike = new Like({ user: user!._id, userSeq: userSeq, likeId: content!._id, likeType: likeType });
     const savedLike = await newLike.save();
+
+    content!.likesCount++;
+    await content!.save();
+
     res.status(201).json(savedLike);
   }
 });

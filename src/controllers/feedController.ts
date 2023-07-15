@@ -25,12 +25,18 @@ const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  res.status(200).json(feed);
+  const commentsCount = feed.comments.length;
+
+  res.status(200).json({ ...feed.toJSON(), commentsCount });
 });
 
 const getAllFeeds = asyncHandler(async (req: Request, res: Response) => {
-  const feeds = await Feed.find({});
-  res.json(feeds);
+  const feeds = await Feed.find({}).populate('comments');
+  const feedsWithCommentsCount = feeds.map((feed) => {
+    const commentsCount = feed.comments.length;
+    return { ...feed.toObject(), commentsCount };
+  });
+  res.json(feedsWithCommentsCount);
 });
 
 const updateFeed = asyncHandler(async (req: Request, res: Response) => {
