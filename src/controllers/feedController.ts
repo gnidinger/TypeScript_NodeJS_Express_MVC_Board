@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/User';
 import Feed from '../models/Feed';
 import Comment from '../models/Comment';
+import { PaginatedRequest } from '../interface/PagenatedRequest';
 import sendErrorResponse from '../utils/sendErrorResponse';
 
 const createFeed = asyncHandler(async (req: Request, res: Response) => {
@@ -30,13 +31,28 @@ const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ ...feed.toJSON(), commentsCount });
 });
 
-const getAllFeeds = asyncHandler(async (req: Request, res: Response) => {
-  const feeds = await Feed.find({}).populate('comments');
+const getAllFeeds = asyncHandler(async (req: PaginatedRequest, res: Response) => {
+  const page = parseInt(req.query.page || '1', 10);
+  const limit = parseInt(req.query.limit || '10', 10);
+  const skip = (page - 1) * limit;
+
+  const total = await Feed.countDocuments();
+  const feeds = await Feed.find({}).sort({ createdAt: -1 }).skip(skip).populate('comments');
   const feedsWithCommentsCount = feeds.map((feed) => {
     const commentsCount = feed.comments.length;
     return { ...feed.toObject(), commentsCount };
   });
-  res.json(feedsWithCommentsCount);
+
+  const isLastPage = page * limit >= total;
+  const currentPageDocumentCount = feeds.length;
+
+  res.json({
+    total,
+    pages: Math.ceil(total / limit),
+    isLastPage,
+    currentPageDocumentCount,
+    feedsWithCommentsCount,
+  });
 });
 
 const updateFeed = asyncHandler(async (req: Request, res: Response) => {
