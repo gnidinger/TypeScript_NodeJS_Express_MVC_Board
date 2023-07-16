@@ -7,7 +7,7 @@ import commentRouter from './commentRoutes';
 
 const router = express.Router();
 
-router.post('/', authMiddleware, createFeed);
+router.post('/post', authMiddleware, createFeed);
 router.get('/:feedSeq', getFeedByFeedSeq);
 router.get('/', paginationMiddleware, getAllFeeds);
 router.patch('/:feedSeq/edit', authMiddleware, updateFeed);

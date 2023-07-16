@@ -4,6 +4,7 @@ import User from '../models/User';
 import Feed from '../models/Feed';
 import Comment from '../models/Comment';
 import sendErrorResponse from '../utils/sendErrorResponse';
+import { PaginatedRequest } from '../interface/PagenatedRequest';
 
 const createComment = asyncHandler(async (req: Request, res: Response) => {
   const userSeq = res.locals.user.userSeq;
@@ -26,17 +27,32 @@ const createComment = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json(savedComment);
 });
 
-const getCommentsByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
+const getCommentsByFeedSeq = asyncHandler(async (req: PaginatedRequest, res: Response) => {
   const feedSeq = Number(req.params.feedSeq);
 
-  const comments = await Comment.find({ feedSeq: feedSeq });
+  const page = parseInt(req.query.page || '1', 10);
+  const limit = parseInt(req.query.limit || '10', 10);
+  const skip = (page - 1) * limit;
+
+  const total = await Comment.countDocuments({ feedSeq: feedSeq });
+  const comments = await Comment.find({ feedSeq: feedSeq }).sort({ createdAt: -1 }).skip(skip);
 
   if (!comments) {
     res.status(204).json(comments);
     return;
   }
 
-  res.status(200).json(comments);
+  const currentPageDocumentCount = comments.length;
+  const isLastPage = page >= Math.ceil(total / limit);
+
+  res.status(200).json({
+    total,
+    pages: Math.ceil(total / limit),
+    currentPage: page,
+    isLastPage,
+    currentPageDocumentCount,
+    comments,
+  });
 });
 
 const updateComment = asyncHandler(async (req: Request, res: Response) => {

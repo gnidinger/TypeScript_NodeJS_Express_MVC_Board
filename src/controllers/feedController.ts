@@ -3,8 +3,8 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/User';
 import Feed from '../models/Feed';
 import Comment from '../models/Comment';
-import { PaginatedRequest } from '../interface/PagenatedRequest';
 import sendErrorResponse from '../utils/sendErrorResponse';
+import { PaginatedRequest } from '../interface/PagenatedRequest';
 
 const createFeed = asyncHandler(async (req: Request, res: Response) => {
   const userSeq = res.locals.user.userSeq;
@@ -37,7 +37,7 @@ const getAllFeeds = asyncHandler(async (req: PaginatedRequest, res: Response) =>
   const skip = (page - 1) * limit;
 
   const total = await Feed.countDocuments();
-  const feeds = await Feed.find({}).sort({ createdAt: -1 }).skip(skip).populate('comments');
+  const feeds = await Feed.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('comments');
   const feedsWithCommentsCount = feeds.map((feed) => {
     const commentsCount = feed.comments.length;
     return { ...feed.toObject(), commentsCount };
@@ -49,6 +49,7 @@ const getAllFeeds = asyncHandler(async (req: PaginatedRequest, res: Response) =>
   res.json({
     total,
     pages: Math.ceil(total / limit),
+    curruentPage: page,
     isLastPage,
     currentPageDocumentCount,
     feedsWithCommentsCount,
