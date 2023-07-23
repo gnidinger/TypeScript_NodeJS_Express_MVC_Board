@@ -4,4 +4,4 @@
 cd /home/ubuntu/action
 
 # 애플리케이션 빌드
-sudo npm run build
+npm run build

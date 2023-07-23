@@ -4,4 +4,4 @@
 cd /home/ubuntu/action
 
 # 애플리케이션 실행
-sudo npm start
+npm start
