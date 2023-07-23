@@ -5,6 +5,3 @@ cd /home/ubuntu/action
 
 # 애플리케이션 빌드
 npm run build
-
-# 애플리케이션 실행
-npm start

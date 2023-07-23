@@ -3,11 +3,11 @@ os: linux
 
 files:
   - source: /dist/
-    destination: /home/ubuntu/app
+    destination: /home/ubuntu/action
     overwrite: yes
 
 permissions:
-  - object: /home/ubuntu/app
+  - object: /home/ubuntu/action
     pattern: "**"
     owner: ubuntu
     group: ubuntu
@@ -20,6 +20,11 @@ hooks:
       runas: ubuntu
 
   AfterInstall:
-    - location: scripts/build_and_start.sh
+    - location: scripts/build.sh
+      timeout: 300
+      runas: ubuntu
+
+  ApplicationStart:
+    - location: scripts/start.sh
       timeout: 300
       runas: ubuntu
