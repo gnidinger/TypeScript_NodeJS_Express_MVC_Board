@@ -6,9 +6,9 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME: your-s3-bucket-name
-  CODE_DEPLOY_APPLICATION_NAME: your-codedeploy-app-name
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: your-codedeploy-deploy-group-name
+  S3_BUCKET_NAME: ec2-github-actions
+  CODE_DEPLOY_APPLICATION_NAME: CoGen_Rebuild_CodeDeploy
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: CoGen_Rebuild_DG
 
 jobs:
   build:
