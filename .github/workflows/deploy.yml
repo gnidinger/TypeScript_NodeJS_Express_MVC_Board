@@ -32,6 +32,7 @@ jobs:
       run: |
         npm ci
         npm run build
+        tar -cvf build.tar ./dist
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -51,7 +52,7 @@ jobs:
 
     - name: Upload to AWS S3
       run: |
-        aws s3 cp ./dist s3://${{ env.S3_BUCKET_NAME }}/dist --recursive
+        aws s3 cp ./dist s3://${{ env.S3_BUCKET_NAME }}/build.tar --recursive
 
     - name: Deploy to AWS EC2 from S3
       run: |
@@ -59,4 +60,4 @@ jobs:
           --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-          --s3-location bucket=$S3_BUCKET_NAME,bundleType=tar,key=dist \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=tar,key=build.tar \
