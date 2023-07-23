@@ -56,7 +56,7 @@ jobs:
 
     - name: Zip and Upload to AWS S3
       run: |
-        zip -r deploy.zip .env package.json dist/ scripts/ appspec.yml
+        zip -r deploy.zip ./.env ./package.json ./dist ./scripts appspec.yml
         aws s3 cp deploy.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
 
     - name: Deploy to AWS EC2 from S3
