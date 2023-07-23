@@ -51,7 +51,7 @@ jobs:
 
     - name: Upload to AWS S3
       run: |
-        aws s3 cp ./dist s3://${{ env.S3_BUCKET_NAME }} --recursive
+        aws s3 cp ./dist s3://${{ env.S3_BUCKET_NAME }}/dist --recursive
 
     - name: Deploy to AWS EC2 from S3
       run: |
