@@ -7,7 +7,7 @@ files:
     overwrite: yes
 
 permissions:
-  - object: /home/ubuntu/action
+  - object: /dist/
     pattern: "**"
     owner: ubuntu
     group: ubuntu
