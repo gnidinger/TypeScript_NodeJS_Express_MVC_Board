@@ -11,4 +11,4 @@ sudo mkdir -p /home/ubuntu/action
 cd /home/ubuntu/action
 
 # npm dependencies 설치
-npm install
+/home/ubuntu/.nvm/versions/node/v18.17.0/bin/npm install
