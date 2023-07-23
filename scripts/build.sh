@@ -10,4 +10,4 @@ sudo chown -R $USER:$GROUP /home/ubuntu/action
 cd /home/ubuntu/action
 
 # 애플리케이션 빌드
-sudo npm run build
+sudo /home/ubuntu/.nvm/versions/node/v18.17.0/bin/npm run build
