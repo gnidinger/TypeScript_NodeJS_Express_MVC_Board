@@ -14,12 +14,7 @@ permissions:
     mode: 755
 
 hooks:
-  # AfterInstall:
-  #   - location: scripts/build.sh
-  #     timeout: 300
-  #     runas: ubuntu
-
   ApplicationStart:
-    - location: scripts/start.sh
+    - location: scripts/run.sh
       timeout: 300
       runas: ubuntu
