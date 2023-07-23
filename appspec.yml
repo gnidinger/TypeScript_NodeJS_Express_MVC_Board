@@ -1,0 +1,25 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /dist
+    destination: /home/ubuntu/app
+    overwrite: yes
+
+permissions:
+  - object: /home/ubuntu/app
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: ubuntu
+
+  AfterInstall:
+    - location: scripts/build_and_start.sh
+      timeout: 300
+      runas: ubuntu
