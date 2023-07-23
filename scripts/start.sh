@@ -15,5 +15,5 @@ cd /home/ubuntu/action
 # npm dependencies 설치
 npm install
 
-# 애플리케이션 실행
-npm start
+# 애플리케이션 실행 (백그라운드에서)
+nohup npm start > output.log 2>&1 &
