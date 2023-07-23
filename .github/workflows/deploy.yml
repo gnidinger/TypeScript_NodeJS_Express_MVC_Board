@@ -28,9 +28,23 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Create .env file
+      run: |
+        touch .env
+        echo PORT=${{ secrets.PORT }} >> .env
+        echo DB_URL=${{ secrets.DB_URL }} >> .env
+        echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+        echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env
+        echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env
+        echo KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} >> .env
+        echo KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }} >> .env
+        echo NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }} >> .env
+        echo NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }} >> .env    
+        cat .env
+
     - name: npm install and build
       run: |
-        npm ci
+        npm install
         npm run build
 
     - name: Configure AWS credentials
@@ -39,15 +53,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
-        KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-        NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
-        NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
-        DB_URL: ${{ secrets.DB_URL }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        PORT: ${{ secrets.PORT }}
 
     - name: Upload to AWS S3
       run: |
