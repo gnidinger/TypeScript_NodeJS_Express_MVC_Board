@@ -4,13 +4,14 @@ import clickLikeContent from '../controllers/likeController';
 import { authMiddleware } from '../middleware/authentication';
 import { paginationMiddleware } from '../middleware/pagenation';
 import commentRouter from './commentRoutes';
+import { upload } from '../utils/imageUtils';
 
 const router = express.Router();
 
-router.post('/post', authMiddleware, createFeed);
+router.post('/post', authMiddleware, upload.single('image'), createFeed);
 router.get('/:feedSeq', getFeedByFeedSeq);
 router.get('/', paginationMiddleware, getAllFeeds);
-router.patch('/:feedSeq/edit', authMiddleware, updateFeed);
+router.patch('/:feedSeq/edit', authMiddleware, upload.single('image'), updateFeed);
 router.delete('/:feedSeq/delete', authMiddleware, deleteFeed);
 
 router.use('/:feedSeq/comments', commentRouter);

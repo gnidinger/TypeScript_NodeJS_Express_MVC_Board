@@ -1,9 +1,10 @@
 import multer from 'multer';
 import sharp from 'sharp';
-import AWS from 'aws-sdk';
+import { S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
-const s3 = new AWS.S3();
+const s3 = new S3Client({ region: 'ap-northeast-2' });
 
 const multerStorage = multer.memoryStorage();
 
@@ -65,7 +66,7 @@ const extractThumbnail = async (buffer: Buffer): Promise<Buffer> => {
 };
 
 // 이미지를 S3에 업로드
-const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Promise<AWS.S3.ManagedUpload.SendData> => {
+const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Promise<string> => {
   const params = {
     Bucket: `${process.env.AWS_BUCKET_NAME}/${folder}`,
     Key: `${fileName}.png`,
@@ -75,26 +76,48 @@ const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Pro
   };
 
   try {
-    const data = await s3.upload(params).promise();
-    return data;
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+    return `https://${process.env.AWS_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${folder}/${fileName}.png`;
   } catch (error) {
     throw new Error('S3에 업로드하는 데 실패했습니다.');
   }
 };
 
 // 이미지를 S3에서 삭제
+export const deleteFromS3 = async (filePath: string): Promise<void> => {
+  const fileName = filePath.split('/').pop();
+
+  if (!fileName) {
+    throw new Error('S3에서 삭제할 파일 이름을 추출하는데 실패하였습니다.');
+  }
+
+  const folder = filePath.includes('thumbnails') ? 'thumbnails' : 'feed-images';
+
+  const params = {
+    Bucket: `${process.env.AWS_BUCKET_NAME}/${folder}`,
+    Key: fileName,
+  };
+
+  try {
+    const command = new DeleteObjectCommand(params);
+    await s3.send(command);
+  } catch (error) {
+    throw new Error('S3에서 삭제하는 데 실패했습니다.');
+  }
+};
 
 export const resizeAndUploadToS3 = async (file: Express.Multer.File) => {
   const fileName = `feed-${uuidv4()}`;
 
   const resizedBuffer = await resizeImage(file);
-  const resizeData = await uploadToS3(resizedBuffer, fileName, 'feed-images');
+  const resizedImageUrl = await uploadToS3(resizedBuffer, fileName, 'feed-images');
 
   const thumbnailBuffer = await extractThumbnail(resizedBuffer);
-  const thumbnailData = await uploadToS3(thumbnailBuffer, `${fileName}-thumbnail`, 'thumbnails');
+  const thumbnailImageUrl = await uploadToS3(thumbnailBuffer, `${fileName}-thumbnail`, 'thumbnails');
 
   return {
-    resizedImageUrl: resizeData.Location,
-    thumbnailImageUrl: thumbnailData.Location,
+    resizedImageUrl,
+    thumbnailImageUrl,
   };
 };

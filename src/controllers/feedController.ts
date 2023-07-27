@@ -5,16 +5,36 @@ import Feed from '../models/Feed';
 import Comment from '../models/Comment';
 import sendErrorResponse from '../utils/sendErrorResponse';
 import { PaginatedRequest } from '../interface/PagenatedRequest';
+import { resizeAndUploadToS3, deleteFromS3 } from '../utils/imageUtils';
 
 const createFeed = asyncHandler(async (req: Request, res: Response) => {
   const userSeq = res.locals.user.userSeq;
-
   const user = await User.findOne({ userSeq: userSeq });
 
-  const newFeed = new Feed({ ...req.body, user: user!._id, userSeq: userSeq });
+  if (req.file) {
+    try {
+      const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
 
-  const savedFeed = await newFeed.save();
-  res.status(201).json(savedFeed);
+      const newFeed = new Feed({
+        ...req.body,
+        user: user!._id,
+        userSeq: userSeq,
+        imageUrl: resizedImageUrl,
+        thumbnailUrl: thumbnailImageUrl,
+      });
+      const savedFeed = await newFeed.save();
+
+      res.status(201).json(savedFeed);
+    } catch (error) {
+      sendErrorResponse(res, 500, '이미지 업로드가 실패했습니다.');
+      return;
+    }
+  } else {
+    const newFeed = new Feed({ ...req.body, user: user!._id, userSeq: userSeq });
+    const savedFeed = await newFeed.save();
+
+    res.status(201).json(savedFeed);
+  }
 });
 
 const getFeedByFeedSeq = asyncHandler(async (req: Request, res: Response) => {
@@ -72,6 +92,25 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  if (req.file) {
+    try {
+      const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
+
+      if (feed.imageUrl) {
+        await deleteFromS3(feed.imageUrl);
+      }
+      if (feed.thumbnailUrl) {
+        await deleteFromS3(feed.thumbnailUrl);
+      }
+
+      feed.imageUrl = resizedImageUrl;
+      feed.thumbnailUrl = thumbnailImageUrl;
+    } catch (error) {
+      sendErrorResponse(res, 500, '이미지 업로드가 실패했습니다.');
+      return;
+    }
+  }
+
   feed.title = req.body.title;
   feed.content = req.body.content;
 
@@ -93,6 +132,24 @@ const deleteFeed = asyncHandler(async (req: Request, res: Response) => {
   if (feed.userSeq !== userSeq) {
     sendErrorResponse(res, 401, 'Unauthorized');
     return;
+  }
+
+  if (feed.imageUrl) {
+    try {
+      await deleteFromS3(feed.imageUrl);
+    } catch (error) {
+      sendErrorResponse(res, 500, '이미지 삭제에 실패했습니다.');
+      return;
+    }
+  }
+
+  if (feed.thumbnailUrl) {
+    try {
+      await deleteFromS3(feed.thumbnailUrl);
+    } catch (error) {
+      sendErrorResponse(res, 500, '썸네일 삭제에 실패했습니다.');
+      return;
+    }
   }
 
   await Comment.deleteMany({ feed: feed._id });

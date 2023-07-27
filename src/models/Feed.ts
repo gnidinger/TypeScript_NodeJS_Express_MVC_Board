@@ -9,6 +9,8 @@ interface IFeed extends Document {
   content: string;
   comments: Schema.Types.ObjectId[];
   likesCount: number;
+  imageUrl: string;
+  thumbnailUrl: string;
 }
 
 const feedSchema: Schema<IFeed> = new Schema(
@@ -28,6 +30,8 @@ const feedSchema: Schema<IFeed> = new Schema(
       },
     ],
     likesCount: { type: Number, default: 0 },
+    imageUrl: { type: String },
+    thumbnailUrl: { type: String },
   },
   {
     timestamps: true,
