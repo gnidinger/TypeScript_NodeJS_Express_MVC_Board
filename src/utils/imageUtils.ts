@@ -11,6 +11,7 @@ const multerStorage = multer.memoryStorage();
 // 이미지 파일인지 체크
 // eslint-disable-next-line @typescript-eslint/no-explicit-any,
 const multerFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  console.log(file);
   if (file.mimetype.startsWith('image/jpeg') || file.mimetype.startsWith('image/png')) {
     cb(null, true);
   } else {
@@ -67,19 +68,27 @@ const extractThumbnail = async (buffer: Buffer): Promise<Buffer> => {
 
 // 이미지를 S3에 업로드
 const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Promise<string> => {
+  console.log('업로드 시작');
   const params = {
-    Bucket: `${process.env.AWS_BUCKET_NAME}/${folder}`,
-    Key: `${fileName}.png`,
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: `${folder}/${fileName}.png`,
     Body: buffer,
-    ACL: 'public-read',
     ContentType: 'image/png',
   };
+
+  console.log('S3 업로드 준비 끝');
+  console.log(process.env.AWS_BUCKET_NAME);
+  console.log(folder);
+  console.log(fileName);
 
   try {
     const command = new PutObjectCommand(params);
     await s3.send(command);
+    console.log('S3 업로드 시작');
     return `https://${process.env.AWS_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${folder}/${fileName}.png`;
   } catch (error) {
+    console.log('S3 업로드 실패');
+    console.error(error);
     throw new Error('S3에 업로드하는 데 실패했습니다.');
   }
 };
@@ -111,6 +120,7 @@ export const resizeAndUploadToS3 = async (file: Express.Multer.File) => {
   const fileName = `feed-${uuidv4()}`;
 
   const resizedBuffer = await resizeImage(file);
+  console.log('리사이징 완료.');
   const resizedImageUrl = await uploadToS3(resizedBuffer, fileName, 'feed-images');
 
   const thumbnailBuffer = await extractThumbnail(resizedBuffer);
