@@ -71,7 +71,6 @@ const extractThumbnail = async (buffer: Buffer): Promise<Buffer> => {
   return await sharp(buffer)
     .extract({ left, top, width: smallestDimension, height: smallestDimension })
     .resize(500, 500)
-    // .png()
     .toBuffer();
 };
 
@@ -122,7 +121,6 @@ export const resizeAndUploadToS3 = async (file: Express.Multer.File) => {
   const fileName = `feed-${uuidv4()}`;
 
   const resizedBuffer = await resizeImage(file);
-  console.log('리사이징 완료.');
   const resizedImageUrl = await uploadToS3(resizedBuffer, fileName, 'feed-images');
 
   const thumbnailBuffer = await extractThumbnail(resizedBuffer);
