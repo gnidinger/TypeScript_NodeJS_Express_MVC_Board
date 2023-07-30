@@ -1,17 +1,15 @@
 import multer from 'multer';
 import sharp from 'sharp';
-import { S3Client } from '@aws-sdk/client-s3';
-import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
-const s3 = new S3Client({ region: 'ap-northeast-2' });
+const s3 = new S3Client({ region: process.env.AWS_REGION });
 
 const multerStorage = multer.memoryStorage();
 
 // 이미지 파일인지 체크
 // eslint-disable-next-line @typescript-eslint/no-explicit-any,
 const multerFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  console.log(file);
   if (file.mimetype.startsWith('image/jpeg') || file.mimetype.startsWith('image/png')) {
     cb(null, true);
   } else {
