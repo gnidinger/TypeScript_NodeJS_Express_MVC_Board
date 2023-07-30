@@ -59,6 +59,11 @@ const extractThumbnail = async (buffer: Buffer): Promise<Buffer> => {
     throw new Error('이미지 데이터를 가져올 수 없습니다.');
   }
 
+  // 이미지의 가로 또는 세로 길이가 500 미만인 경우 에러 발생.
+  if (width < 500 || height < 500) {
+    throw new Error('이미지의 크기가 너무 작습니다. 크기가 500x500 이상인 이미지를 업로드해 주세요.');
+  }
+
   const smallestDimension = Math.min(width, height);
   const left = (width - smallestDimension) / 2;
   const top = (height - smallestDimension) / 2;
