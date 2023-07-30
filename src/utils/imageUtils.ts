@@ -24,25 +24,31 @@ export const upload = multer({
 
 // 최대 1024x1024로 이미지를 리사이징하되, 가로 세로 비율은 유지
 const resizeImage = async (file: Express.Multer.File): Promise<Buffer> => {
-  const resizedBuffer = await sharp(file.buffer)
-    .resize(1024, 1024, {
-      fit: sharp.fit.inside,
-      withoutEnlargement: true,
-    })
-    // .png()
-    .toBuffer();
-
-  const { width, height } = await sharp(resizedBuffer).metadata();
+  const { width, height } = await sharp(file.buffer).metadata();
 
   if (!width || !height) {
     throw new Error('이미지 데이터를 가져올 수 없습니다.');
   }
 
-  if (width < 500 || height < 500) {
+  // 이미지의 가로와 세로 길이가 500 미만인 경우 에러 발생.
+  if (width < 500 && height < 500) {
     throw new Error('이미지의 크기가 너무 작습니다. 크기가 500x500 이상인 이미지를 업로드해 주세요.');
   }
 
-  return resizedBuffer;
+  // 이미지의 가로 또는 세로 길이가 1024 이상인 경우에만 크기를 조정.
+  if (width > 1024 || height > 1024) {
+    const resizedBuffer = await sharp(file.buffer)
+      .resize(1024, 1024, {
+        fit: sharp.fit.inside,
+        withoutEnlargement: true,
+      })
+      .toBuffer();
+
+    return resizedBuffer;
+  }
+
+  // 그 외의 경우 (가로 또는 세로 길이가 500 이상 1024 이하인 경우) 원본 이미지를 그대로 반환.
+  return file.buffer;
 };
 
 // 가장 큰 정사각형을 찾아서 500x500으로 리사이징
@@ -74,18 +80,11 @@ const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Pro
     ContentType: 'image/png',
   };
 
-  console.log('S3 업로드 준비 끝');
-  console.log(process.env.AWS_BUCKET_NAME);
-  console.log(folder);
-  console.log(fileName);
-
   try {
     const command = new PutObjectCommand(params);
     await s3.send(command);
-    console.log('S3 업로드 시작');
     return `https://${process.env.AWS_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${folder}/${fileName}.png`;
   } catch (error) {
-    console.log('S3 업로드 실패');
     console.error(error);
     throw new Error('S3에 업로드하는 데 실패했습니다.');
   }
