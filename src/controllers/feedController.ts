@@ -11,12 +11,14 @@ const createFeed = asyncHandler(async (req: Request, res: Response) => {
   const userSeq = res.locals.user.userSeq;
   const user = await User.findOne({ userSeq: userSeq });
 
+  const data = JSON.parse(req.body.data);
+
   if (req.file) {
     try {
       const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
 
       const newFeed = new Feed({
-        ...req.body,
+        ...data,
         user: user!._id,
         userSeq: userSeq,
         imageUrl: resizedImageUrl,
@@ -30,7 +32,7 @@ const createFeed = asyncHandler(async (req: Request, res: Response) => {
       return;
     }
   } else {
-    const newFeed = new Feed({ ...req.body, user: user!._id, userSeq: userSeq });
+    const newFeed = new Feed({ ...data, user: user!._id, userSeq: userSeq });
     const savedFeed = await newFeed.save();
 
     res.status(201).json(savedFeed);
@@ -92,6 +94,8 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  const data = JSON.parse(req.body.data);
+
   if (req.file) {
     try {
       const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
@@ -109,10 +113,25 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
       sendErrorResponse(res, 500, '이미지 업로드가 실패했습니다.');
       return;
     }
+  } else if (data.removeImage) {
+    // If there's a 'removeImage' property in the body of the request, the user wants to remove the image.
+    try {
+      if (feed.imageUrl) {
+        await deleteFromS3(feed.imageUrl);
+        feed.imageUrl = null;
+      }
+      if (feed.thumbnailUrl) {
+        await deleteFromS3(feed.thumbnailUrl);
+        feed.thumbnailUrl = null;
+      }
+    } catch (error) {
+      sendErrorResponse(res, 500, '이미지 삭제가 실패했습니다.');
+      return;
+    }
   }
 
-  feed.title = req.body.title;
-  feed.content = req.body.content;
+  feed.title = data.title;
+  feed.content = data.content;
 
   const updatedFeed = await feed.save();
   res.status(200).json(updatedFeed);

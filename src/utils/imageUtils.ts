@@ -76,7 +76,6 @@ const extractThumbnail = async (buffer: Buffer): Promise<Buffer> => {
 
 // 이미지를 S3에 업로드
 const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Promise<string> => {
-  console.log('업로드 시작');
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: `${folder}/${fileName}.png`,
@@ -87,7 +86,7 @@ const uploadToS3 = async (buffer: Buffer, fileName: string, folder: string): Pro
   try {
     const command = new PutObjectCommand(params);
     await s3.send(command);
-    return `https://${process.env.AWS_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${folder}/${fileName}.png`;
+    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${folder}/${fileName}.png`;
   } catch (error) {
     console.error(error);
     throw new Error('S3에 업로드하는 데 실패했습니다.');
