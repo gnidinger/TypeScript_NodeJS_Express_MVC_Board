@@ -10,6 +10,8 @@ interface IUser extends Document {
   naverId?: string;
   password: string;
   name: string;
+  following: number[];
+  followers: number[];
   matchPassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -36,6 +38,20 @@ const userSchema: Schema<IUser> = new Schema(
       },
     },
     name: { type: String, required: true },
+    following: [
+      {
+        type: Number,
+        ref: 'User',
+        default: [],
+      },
+    ],
+    followers: [
+      {
+        type: Number,
+        ref: 'User',
+        default: [],
+      },
+    ],
   },
   {
     timestamps: true,

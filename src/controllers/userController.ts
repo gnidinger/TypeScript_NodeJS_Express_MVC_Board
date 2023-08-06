@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/User';
 import generateToken from '../utils/generateToken';
 import sendErrorResponse from '../utils/sendErrorResponse';
+import { PaginatedRequest } from '../interface/PagenatedRequest';
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const { id, password, name } = req.body;
@@ -60,6 +61,8 @@ const getUserByUserSeq = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({
     id: user.id,
     name: user.name,
+    followingCount: user.following.length,
+    followerCount: user.followers.length,
   });
 });
 
