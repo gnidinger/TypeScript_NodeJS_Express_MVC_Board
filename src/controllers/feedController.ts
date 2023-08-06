@@ -13,6 +13,10 @@ const createFeed = asyncHandler(async (req: Request, res: Response) => {
 
   const data = JSON.parse(req.body.data);
 
+  if (data.tags && data.tags.length > 10) {
+    sendErrorResponse(res, 400, '태그는 최대 10개까지 등록 가능합니다.');
+  }
+
   if (req.file) {
     try {
       const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
@@ -96,6 +100,10 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
 
   const data = JSON.parse(req.body.data);
 
+  if (data.tags && data.tags.length > 10) {
+    sendErrorResponse(res, 400, '태그는 최대 10개까지 등록 가능합니다.');
+  }
+
   if (req.file) {
     try {
       const { resizedImageUrl, thumbnailImageUrl } = await resizeAndUploadToS3(req.file);
@@ -132,6 +140,7 @@ const updateFeed = asyncHandler(async (req: Request, res: Response) => {
 
   feed.title = data.title;
   feed.content = data.content;
+  feed.tags = data.tags || [];
 
   const updatedFeed = await feed.save();
   res.status(200).json(updatedFeed);

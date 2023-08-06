@@ -11,6 +11,7 @@ interface IFeed extends Document {
   likesCount: number;
   imageUrl: string | null;
   thumbnailUrl: string | null;
+  tags: string[];
 }
 
 const feedSchema: Schema<IFeed> = new Schema(
@@ -32,6 +33,7 @@ const feedSchema: Schema<IFeed> = new Schema(
     likesCount: { type: Number, default: 0 },
     imageUrl: { type: String, default: null },
     thumbnailUrl: { type: String, default: null },
+    tags: { type: [String], default: [] },
   },
   {
     timestamps: true,
