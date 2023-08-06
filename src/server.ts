@@ -4,6 +4,7 @@ import connectDB from './config/db';
 import userRoutes from './routes/userRoutes';
 import feedRoutes from './routes/feedRoutes';
 import commentRoutes from './routes/commentRoutes';
+import searchRoutes from './routes/searchRoutes';
 import morgan from 'morgan';
 import cors from './config/cors';
 import sendErrorResponse from './utils/sendErrorResponse';
@@ -22,6 +23,7 @@ app.use(cors);
 app.use('/users', userRoutes);
 app.use('/feeds', feedRoutes);
 app.use('/comments', commentRoutes);
+app.use('/search', searchRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
